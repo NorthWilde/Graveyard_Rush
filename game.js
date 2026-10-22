@@ -33,6 +33,7 @@ const enemyInterval = 1200;
 let lastShotTime = 0;
 const shotInterval = 250;
 let lastFrameTime = null;
+let elapsedTime = 0;
 
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -248,18 +249,20 @@ function animate(time) {
     return;
   }
 
-    if (lastFrameTime === null) {
+      if (lastFrameTime === null) {
     lastFrameTime = time;
   }
 
-  // 距离上一帧过去了多少秒
-  // 距离上一帧过去了多少秒
+  // 先计算这一帧经过了多少秒
   const deltaTime = Math.min(
     (time - lastFrameTime) / 1000,
     0.05
   );
 
   lastFrameTime = time;
+
+  // 再累计游戏时间
+  elapsedTime += deltaTime;
 
   // 到达发射间隔，生成一颗子弹
   if (time - lastShotTime >= shotInterval) {
@@ -279,18 +282,21 @@ function animate(time) {
       bullets.splice(i, 1);
     }
   }
-  // 定时生成敌人
+    // 定时生成敌人
   if (time - lastEnemyTime >= enemyInterval) {
-    const size = 36;
-    enemies.push({
-  x: Math.random() * (canvas.width - size),
-  y: -size,
-  width: size,
-  height: size,
-  health: 10,
-  maxHealth: 10
-});
+    const difficulty = Math.floor(elapsedTime / 10);
 
+    const size = Math.min(36 + difficulty * 4, 80);
+    const health = 10 + difficulty * 10;
+
+    enemies.push({
+      x: Math.random() * (canvas.width - size),
+      y: -size,
+      width: size,
+      height: size,
+      health: health,
+      maxHealth: health
+    });
 
     lastEnemyTime = time;
   }
@@ -311,10 +317,12 @@ function animate(time) {
   }
 }
   }
-    // 检查子弹有没有击中敌人
+      // 逐颗检查子弹
   for (let i = bullets.length - 1; i >= 0; i--) {
     const bullet = bullets[i];
+    let hasHit = false;
 
+    // 先检查敌人
     for (let j = enemies.length - 1; j >= 0; j--) {
       const enemy = enemies[j];
 
@@ -323,16 +331,17 @@ function animate(time) {
         bullet.x - 3 < enemy.x + enemy.width &&
         bullet.y + 14 > enemy.y &&
         bullet.y < enemy.y + enemy.height;
+
       if (isHit) {
+        hasHit = true;
+
         enemy.health = Math.max(
           0,
           enemy.health - bulletDamage
         );
 
-        // 命中后，子弹消失
         bullets.splice(i, 1);
 
-        // 生命归零后，敌人才消失并加分
         if (enemy.health <= 0) {
           enemies.splice(j, 1);
 
@@ -343,7 +352,44 @@ function animate(time) {
         break;
       }
     }
+
+    // 子弹已经命中敌人，不再检查门
+    if (hasHit) {
+      continue;
+    }
+
+    // 再检查数字门
+    for (let j = gates.length - 1; j >= 0; j--) {
+      const gate = gates[j];
+
+      const hitGate =
+        bullet.x + 3 > gate.x &&
+        bullet.x - 3 < gate.x + gate.width &&
+        bullet.y + 14 > gate.y &&
+        bullet.y < gate.y + gate.height;
+
+      if (hitGate) {
+        gate.health = Math.max(
+          0,
+          gate.health - bulletDamage
+        );
+
+        bullets.splice(i, 1);
+
+        if (gate.health <= 0) {
+          bulletDamage += gate.bonus;
+
+          messageDisplay.textContent =
+            `Upgrade! Bullet damage: ${bulletDamage}`;
+
+          gates.splice(j, 1);
+        }
+
+        break;
+      }
+    }
   }
+
     // 定时生成数字门
   if (time - lastGateTime >= gateInterval) {
     const gateWidth = 150;
