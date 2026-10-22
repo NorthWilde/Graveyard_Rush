@@ -90,12 +90,43 @@ function draw() {
     // 绘制敌人
   ctx.fillStyle = "#e889a8";
 
-  for (const enemy of enemies) {
+    for (const enemy of enemies) {
+    // 敌人身体
+    ctx.fillStyle = "#e889a8";
     ctx.fillRect(
       enemy.x,
       enemy.y,
       enemy.width,
       enemy.height
+    );
+
+    // 血条底色
+    ctx.fillStyle = "#dce3eb";
+    ctx.fillRect(
+      enemy.x,
+      enemy.y - 18,
+      enemy.width,
+      14
+    );
+
+    // 剩余生命
+    ctx.fillStyle = "#83c7e2";
+    ctx.fillRect(
+      enemy.x,
+      enemy.y - 18,
+      enemy.width * (enemy.health / enemy.maxHealth),
+      14
+    );
+
+    // 血量数字
+    ctx.fillStyle = "#29465b";
+    ctx.font = "bold 11px Arial";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(
+      enemy.health,
+      enemy.x + enemy.width / 2,
+      enemy.y - 11
     );
   }
 }
@@ -150,10 +181,15 @@ canvas.addEventListener("pointercancel", stopDragging);
 canvas.addEventListener("lostpointercapture", stopDragging);
 
 function animate(time) {
-  if (lastFrameTime === null) {
+  if (isGameOver) {
+    return;
+  }
+
+    if (lastFrameTime === null) {
     lastFrameTime = time;
   }
 
+  // 距离上一帧过去了多少秒
   // 距离上一帧过去了多少秒
   const deltaTime = Math.min(
     (time - lastFrameTime) / 1000,
@@ -183,13 +219,15 @@ function animate(time) {
   // 定时生成敌人
   if (time - lastEnemyTime >= enemyInterval) {
     const size = 36;
-
     enemies.push({
-      x: Math.random() * (canvas.width - size),
-      y: -size,
-      width: size,
-      height: size
-    });
+  x: Math.random() * (canvas.width - size),
+  y: -size,
+  width: size,
+  height: size,
+  health: 10,
+  maxHealth: 10
+});
+
 
     lastEnemyTime = time;
   }
@@ -222,13 +260,22 @@ function animate(time) {
         bullet.x - 3 < enemy.x + enemy.width &&
         bullet.y + 14 > enemy.y &&
         bullet.y < enemy.y + enemy.height;
+      if (isHit) {
+        enemy.health = Math.max(
+          0,
+          enemy.health - bulletDamage
+        );
 
-            if (isHit) {
-        enemies.splice(j, 1);
+        // 命中后，子弹消失
         bullets.splice(i, 1);
 
-        score += 10;
-        scoreDisplay.textContent = score;
+        // 生命归零后，敌人才消失并加分
+        if (enemy.health <= 0) {
+          enemies.splice(j, 1);
+
+          score += 10;
+          scoreDisplay.textContent = score;
+        }
 
         break;
       }
