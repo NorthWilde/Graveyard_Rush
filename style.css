@@ -1,7 +1,7 @@
 body {
   margin: 0;
   padding: 30px 16px;
-  background: #12151d;
+  background: #83c7e2;
   color: #f4f2ed;
   font-family: Arial, sans-serif;
   text-align: center;
@@ -11,8 +11,8 @@ button {
   display: block;
   margin: 20px auto;
   padding: 12px 24px;
-  background: #dfff90;
-  color: #172018;
+  background: #f3dfff;
+  color: #292529;
   border: none;
   border-radius: 8px;
   font-size: 16px;
@@ -20,12 +20,13 @@ button {
 }
 
 canvas {
+  touch-action: none;
   display: block;
   width: 100%;
   max-width: 480px;
   height: auto;
   margin: 0 auto;
-  background: #222938;
-  border: 1px solid #465066;
+  background: #ffffff;
+  border: 2px solid #6cc6dc;
   border-radius: 12px;
 }
