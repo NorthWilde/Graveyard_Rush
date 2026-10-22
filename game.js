@@ -3,10 +3,13 @@ const ctx = canvas.getContext("2d");
 const scoreDisplay = document.getElementById("score");
 
 let score = 0;
-const livesDisplay = document.getElementById("lives");
 const messageDisplay = document.getElementById("message");
 
-let lives = 3;
+const maxLives = 200;
+let lives = maxLives;
+
+let bulletDamage = 10;
+const enemyDamage = 10;
 let isGameOver = false;
 // 玩家位置和尺寸
 const player = {
@@ -44,6 +47,35 @@ function draw() {
     player.width,
     player.height - 20
   );
+     // 玩家脚下的血条
+  const barWidth = 64;
+  const barHeight = 16;
+  const barX = player.x - barWidth / 2;
+  const barY = player.y + 28;
+
+  // 血条底色
+  ctx.fillStyle = "#dce3eb";
+  ctx.fillRect(barX, barY, barWidth, barHeight);
+
+  // 剩余生命
+  ctx.fillStyle = "#e889a8";
+  ctx.fillRect(
+    barX,
+    barY,
+    barWidth * (lives / maxLives),
+    barHeight
+  );
+
+  // 血量数字
+  ctx.fillStyle = "#29465b";
+  ctx.font = "bold 12px Arial";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(
+    `${lives}/${maxLives}`,
+    player.x,
+    barY + barHeight / 2
+  );
     // 绘制所有子弹
   ctx.fillStyle = "#efacc8";
 
@@ -79,7 +111,7 @@ function movePlayer(event) {
     (event.clientX - rect.left) * (canvas.width / rect.width);
 
   // 限制角色，避免移出画布
-  const halfWidth = player.width / 2;
+  const halfWidth = Math.max(player.width / 2, 32);
 
   player.x = Math.max(
     halfWidth,
@@ -169,8 +201,7 @@ function animate(time) {
     if (enemies[i].y > canvas.height) {
   enemies.splice(i, 1);
 
-  lives -= 1;
-  livesDisplay.textContent = lives;
+  lives = Math.max(0, lives - enemyDamage);
 
   if (lives <= 0) {
     isGameOver = true;
