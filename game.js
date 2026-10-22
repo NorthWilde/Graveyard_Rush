@@ -1,5 +1,17 @@
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
+const enemyImage = new Image();
+let enemyImageReady = false;
+
+enemyImage.onload = function () {
+  enemyImageReady = true;
+};
+
+enemyImage.onerror = function () {
+  console.warn("Enemy image could not be loaded.");
+};
+
+enemyImage.src = "assets/enemy-walk.png";
 const scoreDisplay = document.getElementById("score");
 
 let score = 0;
@@ -97,13 +109,31 @@ function draw() {
 
     for (const enemy of enemies) {
     // 敌人身体
-    ctx.fillStyle = "#e889a8";
-    ctx.fillRect(
-      enemy.x,
-      enemy.y,
-      enemy.width,
-      enemy.height
-    );
+        if (enemyImageReady) {
+      const frameWidth = enemyImage.naturalWidth / 3;
+      const frameHeight = enemyImage.naturalHeight;
+      const frame = Math.floor(elapsedTime / 0.15) % 3;
+
+      ctx.drawImage(
+        enemyImage,
+        frame * frameWidth,
+        0,
+        frameWidth,
+        frameHeight,
+        enemy.x,
+        enemy.y,
+        enemy.width,
+        enemy.height
+      );
+    } else {
+      ctx.fillStyle = "#e889a8";
+      ctx.fillRect(
+        enemy.x,
+        enemy.y,
+        enemy.width,
+        enemy.height
+      );
+    }
 
     // 血条底色
     ctx.fillStyle = "#dce3eb";
