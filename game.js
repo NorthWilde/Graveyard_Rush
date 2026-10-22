@@ -11,6 +11,10 @@ const player = {
 
 let activePointerId = null;
 const bullets = [];
+const enemies = [];
+
+let lastEnemyTime = 0;
+const enemyInterval = 1200;
 
 let lastShotTime = 0;
 const shotInterval = 250;
@@ -42,6 +46,17 @@ function draw() {
       bullet.y,
       6,
       14
+    );
+  }
+    // 绘制敌人
+  ctx.fillStyle = "#e889a8";
+
+  for (const enemy of enemies) {
+    ctx.fillRect(
+      enemy.x,
+      enemy.y,
+      enemy.width,
+      enemy.height
     );
   }
 }
@@ -123,7 +138,49 @@ function animate(time) {
       bullets.splice(i, 1);
     }
   }
+  // 定时生成敌人
+  if (time - lastEnemyTime >= enemyInterval) {
+    const size = 36;
 
+    enemies.push({
+      x: Math.random() * (canvas.width - size),
+      y: -size,
+      width: size,
+      height: size
+    });
+
+    lastEnemyTime = time;
+  }
+
+  // 敌人向下移动，离开画面后移除
+  for (let i = enemies.length - 1; i >= 0; i--) {
+    enemies[i].y += 90 * deltaTime;
+
+    if (enemies[i].y > canvas.height) {
+      enemies.splice(i, 1);
+    }
+  }
+    // 检查子弹有没有击中敌人
+  for (let i = bullets.length - 1; i >= 0; i--) {
+    const bullet = bullets[i];
+
+    for (let j = enemies.length - 1; j >= 0; j--) {
+      const enemy = enemies[j];
+
+      const isHit =
+        bullet.x + 3 > enemy.x &&
+        bullet.x - 3 < enemy.x + enemy.width &&
+        bullet.y + 14 > enemy.y &&
+        bullet.y < enemy.y + enemy.height;
+
+      if (isHit) {
+        enemies.splice(j, 1);
+        bullets.splice(i, 1);
+
+        break;
+      }
+    }
+  }
   draw();
   requestAnimationFrame(animate);
 }
