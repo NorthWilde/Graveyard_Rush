@@ -1,6 +1,13 @@
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
+const scoreDisplay = document.getElementById("score");
 
+let score = 0;
+const livesDisplay = document.getElementById("lives");
+const messageDisplay = document.getElementById("message");
+
+let lives = 3;
+let isGameOver = false;
 // 玩家位置和尺寸
 const player = {
   x: canvas.width / 2,
@@ -60,8 +67,11 @@ function draw() {
     );
   }
 }
-
 function movePlayer(event) {
+  if (isGameOver) {
+    return;
+  }
+
   const rect = canvas.getBoundingClientRect();
 
   // 把屏幕上的位置换算成画布里的位置
@@ -157,8 +167,17 @@ function animate(time) {
     enemies[i].y += 90 * deltaTime;
 
     if (enemies[i].y > canvas.height) {
-      enemies.splice(i, 1);
-    }
+  enemies.splice(i, 1);
+
+  lives -= 1;
+  livesDisplay.textContent = lives;
+
+  if (lives <= 0) {
+    isGameOver = true;
+    messageDisplay.textContent = "Game Over! Refresh to try again.";
+    break;
+  }
+}
   }
     // 检查子弹有没有击中敌人
   for (let i = bullets.length - 1; i >= 0; i--) {
@@ -173,9 +192,12 @@ function animate(time) {
         bullet.y + 14 > enemy.y &&
         bullet.y < enemy.y + enemy.height;
 
-      if (isHit) {
+            if (isHit) {
         enemies.splice(j, 1);
         bullets.splice(i, 1);
+
+        score += 10;
+        scoreDisplay.textContent = score;
 
         break;
       }
