@@ -1,32 +1,428 @@
-body {
-  margin: 0;
-  padding: 30px 16px;
-  background: #83c7e2;
-  color: #f4f2ed;
-  font-family: Arial, sans-serif;
-  text-align: center;
+/* 基础设置 */
+* {
+  box-sizing: border-box;
 }
 
-button {
+:root {
+  color-scheme: light;
+  font-family: "Trebuchet MS", Arial, sans-serif;
+  color: #29465b;
+  background: #edf6fc;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(
+      circle at 8% 35%,
+      #f9dce9 0,
+      transparent 38%
+    ),
+    radial-gradient(
+      circle at 95% 65%,
+      #cbeaf8 0,
+      transparent 40%
+    ),
+    #edf6fc;
+}
+
+/* 顶部 */
+.site-header {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 28px 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  color: #29465b;
+  text-decoration: none;
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+
+.logo-icon {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  background: #ffffff;
+  color: #d478a2;
+  font-size: 27px;
+  box-shadow: 0 5px 15px #54789010;
+}
+
+.header-label {
+  color: #71899b;
+  font-size: 10px;
+  font-weight: bold;
+  letter-spacing: 2px;
+}
+
+/* 桌面双栏 */
+.layout {
+  max-width: 1120px;
+  margin: 20px auto 50px;
+  padding: 0 40px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 480px);
+  align-items: center;
+  gap: 70px;
+}
+
+.intro {
+  padding: 20px 0;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  color: #6d8293;
+  font-size: 10px;
+  font-weight: bold;
+  letter-spacing: 1.8px;
+}
+
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #dc8cae;
+}
+
+h1 {
+  margin: 26px 0 22px;
+  font-size: clamp(54px, 6vw, 78px);
+  font-weight: 800;
+  line-height: 1.04;
+  letter-spacing: -4px;
+}
+
+h1 > span {
+  color: #ca7199;
+}
+
+.intro-text {
+  max-width: 340px;
+  margin: 0;
+  color: #627d90;
+  font-size: 15px;
+  line-height: 1.85;
+}
+
+/* 玩法说明 */
+.instructions {
+  margin-top: 34px;
+}
+
+.instruction {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 22px;
+}
+
+.step-number {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  border: 1px solid #ffffff;
+  border-radius: 11px;
+  background: #ffffff80;
+  color: #a36183;
+  font-size: 11px;
+  font-weight: bold;
+}
+
+.instruction h2 {
+  margin: 0 0 5px;
+  font-size: 14px;
+}
+
+.instruction p {
+  max-width: 280px;
+  margin: 0;
+  color: #6b8395;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.tip {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid #7896ae26;
+}
+
+.tip-symbol {
+  color: #ca7199;
+  font-size: 34px;
+}
+
+.tip p {
+  margin: 0;
+  color: #728596;
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+/* 游戏卡片 */
+.arcade {
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid #ffffff;
+  border-radius: 28px;
+  background: #ffffffb8;
+  box-shadow:
+    0 24px 70px #537e9d1c,
+    0 4px 12px #537e9d08;
+}
+
+.game-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  padding: 5px 6px 17px;
+}
+
+.game-name {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.mini-icon {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  background: #f8e4ef;
+  color: #ca7199;
+  font-size: 24px;
+}
+
+.toolbar-label {
   display: block;
-  margin: 20px auto;
-  padding: 12px 24px;
-  background: #f3dfff;
-  color: #292529;
-  border: none;
-  border-radius: 8px;
-  font-size: 16px;
-  cursor: pointer;
+  margin-bottom: 4px;
+  color: #728b9c;
+  font-size: 9px;
+  font-weight: bold;
+  letter-spacing: 1.6px;
+}
+
+.game-name strong {
+  display: block;
+  font-size: 15px;
+}
+
+.score-card {
+  min-width: 76px;
+  padding: 8px 13px;
+  border-radius: 12px;
+  background: #eaf3f9;
+  text-align: right;
+}
+
+.score-card strong {
+  display: block;
+  font-size: 22px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 画布及跑道背景 */
+.canvas-frame {
+  overflow: hidden;
+  border: 2px solid #ffffff;
+  border-radius: 18px;
+  background: #edf7fc;
+  box-shadow: inset 0 0 20px #86b4d018;
 }
 
 canvas {
-  touch-action: none;
   display: block;
   width: 100%;
-  max-width: 480px;
   height: auto;
+  aspect-ratio: 480 / 600;
+  background:
+    linear-gradient(
+      to right,
+      transparent 33.1%,
+      #ffffffa6 33.1%,
+      #ffffffa6 33.6%,
+      transparent 33.6%,
+      transparent 66.4%,
+      #ffffffa6 66.4%,
+      #ffffffa6 66.9%,
+      transparent 66.9%
+    ),
+    linear-gradient(
+      to bottom,
+      #e1f0f9,
+      #f7edf5
+    );
+  touch-action: none;
+  user-select: none;
+}
+
+/* 提示和按钮 */
+.game-bottom {
+  padding: 0 4px 5px;
+  text-align: center;
+}
+
+#message {
+  display: grid;
+  place-items: center;
+  min-height: 40px;
+  margin: 12px 0;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: #eef4f8;
+  color: #546f83;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+#startButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 30px;
+  width: 100%;
+  padding: 15px 20px;
+  border: 1px solid #e6a5c2;
+  border-radius: 13px;
+  background: #efbad2;
+  color: #55384d;
+  box-shadow: 0 4px 0 #d998b6;
+  font: inherit;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition:
+    background 0.15s ease,
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+#startButton:hover {
+  background: #f6c9dd;
+}
+
+#startButton:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 #d998b6;
+}
+
+#startButton:focus-visible {
+  outline: 3px solid #487f9f;
+  outline-offset: 5px;
+}
+
+.control-hint {
+  display: block;
+  margin-top: 16px;
+  color: #7c92a2;
+  font-size: 9px;
+  font-weight: bold;
+  letter-spacing: 1.5px;
+}
+
+/* 页脚 */
+.site-footer {
+  max-width: 1120px;
   margin: 0 auto;
-  background: #ffffff;
-  border: 2px solid #6cc6dc;
-  border-radius: 12px;
+  padding: 20px 40px 28px;
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+  color: #7890a1;
+  font-size: 10px;
+}
+
+.site-footer span:last-child {
+  letter-spacing: 1.5px;
+}
+
+/* 手机和平板 */
+@media (max-width: 850px) {
+  .layout {
+    max-width: 560px;
+    grid-template-columns: 1fr;
+    gap: 26px;
+    margin-top: 0;
+    padding: 0 20px;
+  }
+
+  .site-header {
+    padding: 20px;
+  }
+
+  .header-label {
+    display: none;
+  }
+
+  .intro {
+    padding: 15px 5px 0;
+  }
+
+  h1 {
+    margin: 16px 0;
+    font-size: 52px;
+    letter-spacing: -2px;
+  }
+
+  h1 br {
+    display: none;
+  }
+
+  .intro-text {
+    max-width: none;
+    font-size: 13px;
+  }
+
+  .instructions {
+    display: none;
+  }
+
+  .tip {
+    margin-top: 16px;
+    padding-top: 12px;
+  }
+
+  .tip p br {
+    display: none;
+  }
+
+  .arcade {
+    padding: 12px;
+    border-radius: 24px;
+  }
+
+  .site-footer {
+    padding: 10px 20px 24px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #startButton {
+    transition: none;
+  }
 }
