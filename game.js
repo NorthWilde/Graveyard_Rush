@@ -22,6 +22,10 @@ const player = {
 let activePointerId = null;
 const bullets = [];
 const enemies = [];
+const gates = [];
+
+let lastGateTime = 0;
+const gateInterval = 6000;
 
 let lastEnemyTime = 0;
 const enemyInterval = 1200;
@@ -127,6 +131,65 @@ function draw() {
       enemy.health,
       enemy.x + enemy.width / 2,
       enemy.y - 11
+    );
+  }
+      // 绘制可以攻击的数字门
+  for (const gate of gates) {
+    // 门的背景
+    ctx.fillStyle = "#d9eef8";
+    ctx.fillRect(
+      gate.x,
+      gate.y,
+      gate.width,
+      gate.height
+    );
+
+    // 门的边框
+    ctx.strokeStyle = "#589fc2";
+    ctx.lineWidth = 2;
+    ctx.strokeRect(
+      gate.x,
+      gate.y,
+      gate.width,
+      gate.height
+    );
+
+    // 升级奖励
+    ctx.fillStyle = "#29465b";
+    ctx.font = "bold 16px Arial";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(
+      `DMG +${gate.bonus}`,
+      gate.x + gate.width / 2,
+      gate.y + 16
+    );
+
+    // 血条底色
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(
+      gate.x + 10,
+      gate.y + 30,
+      gate.width - 20,
+      14
+    );
+
+    // 剩余血量
+    ctx.fillStyle = "#efacc8";
+    ctx.fillRect(
+      gate.x + 10,
+      gate.y + 30,
+      (gate.width - 20) * (gate.health / gate.maxHealth),
+      14
+    );
+
+    // 血量数字
+    ctx.fillStyle = "#29465b";
+    ctx.font = "bold 11px Arial";
+    ctx.fillText(
+      gate.health,
+      gate.x + gate.width / 2,
+      gate.y + 37
     );
   }
 }
@@ -279,6 +342,31 @@ function animate(time) {
 
         break;
       }
+    }
+  }
+    // 定时生成数字门
+  if (time - lastGateTime >= gateInterval) {
+    const gateWidth = 150;
+
+    gates.push({
+  x: Math.random() * (canvas.width - gateWidth),
+  y: -50,
+  width: gateWidth,
+  height: 50,
+  bonus: 5,
+  health: 200,
+  maxHealth: 200
+});
+
+    lastGateTime = time;
+  }
+
+  // 数字门向下移动
+  for (let i = gates.length - 1; i >= 0; i--) {
+    gates[i].y += 70 * deltaTime;
+
+    if (gates[i].y > canvas.height) {
+      gates.splice(i, 1);
     }
   }
   draw();
