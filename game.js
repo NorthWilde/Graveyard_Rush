@@ -13,8 +13,12 @@ enemyImage.onerror = function () {
 
 enemyImage.src = "assets/enemy-walk.png";
 const scoreDisplay = document.getElementById("score");
+const damageDisplay = document.getElementById("damage");
 
 let score = 0;
+const startButton = document.getElementById("startButton");
+
+let isPlaying = false;
 const messageDisplay = document.getElementById("message");
 
 const maxLives = 200;
@@ -47,6 +51,60 @@ const shotInterval = 250;
 let lastFrameTime = null;
 let elapsedTime = 0;
 
+let audioContext = null;
+
+function enableSound() {
+  const AudioContextClass =
+    window.AudioContext || window.webkitAudioContext;
+
+  if (!AudioContextClass) {
+    return;
+  }
+
+  try {
+    if (!audioContext) {
+      audioContext = new AudioContextClass();
+    }
+
+    audioContext.resume().catch(function () {
+      console.warn("Sound is unavailable.");
+    });
+  } catch (error) {
+    console.warn("Sound is unavailable.");
+  }
+}
+
+function playShootSound() {
+  if (!audioContext || audioContext.state !== "running") {
+    return;
+  }
+
+  const oscillator = audioContext.createOscillator();
+  const volume = audioContext.createGain();
+  const now = audioContext.currentTime;
+
+  oscillator.type = "sine";
+
+  // 音高快速下降，形成短促的射击声
+  oscillator.frequency.setValueAtTime(700, now);
+  oscillator.frequency.exponentialRampToValueAtTime(
+    250,
+    now + 0.06
+  );
+
+  // 小音量，逐渐消失
+  volume.gain.setValueAtTime(0.025, now);
+  volume.gain.exponentialRampToValueAtTime(
+    0.001,
+    now + 0.07
+  );
+
+  oscillator.connect(volume);
+  volume.connect(audioContext.destination);
+
+  oscillator.start(now);
+  oscillator.stop(now + 0.08);
+}
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -225,10 +283,9 @@ function draw() {
   }
 }
 function movePlayer(event) {
-  if (isGameOver) {
-    return;
-  }
-
+  if (!isPlaying || isGameOver) {
+   return;
+}
   const rect = canvas.getBoundingClientRect();
 
   // 把屏幕上的位置换算成画布里的位置
@@ -275,7 +332,7 @@ canvas.addEventListener("pointercancel", stopDragging);
 canvas.addEventListener("lostpointercapture", stopDragging);
 
 function animate(time) {
-  if (isGameOver) {
+  if (!isPlaying || isGameOver) {
     return;
   }
 
@@ -300,6 +357,7 @@ function animate(time) {
       x: player.x,
       y: player.y - 28
     });
+    playShootSound();
 
     lastShotTime = time;
   }
@@ -340,9 +398,16 @@ function animate(time) {
 
   lives = Math.max(0, lives - enemyDamage);
 
-  if (lives <= 0) {
+    if (lives <= 0) {
     isGameOver = true;
-    messageDisplay.textContent = "Game Over! Refresh to try again.";
+    isPlaying = false;
+
+    messageDisplay.textContent =
+      "Shelter shield depleted. Try again!";
+
+    startButton.disabled = false;
+    startButton.textContent = "Try Again";
+
     break;
   }
 }
@@ -408,6 +473,7 @@ function animate(time) {
 
         if (gate.health <= 0) {
           bulletDamage += gate.bonus;
+          damageDisplay.textContent = bulletDamage;
 
           messageDisplay.textContent =
             `Upgrade! Bullet damage: ${bulletDamage}`;
@@ -449,4 +515,50 @@ function animate(time) {
   requestAnimationFrame(animate);
 }
 
-requestAnimationFrame(animate);
+startButton.addEventListener("click", function () {
+  if (isPlaying) {
+    return;
+  }
+    enableSound();
+
+  // 重置生命、分数和攻击力
+  lives = maxLives;
+  score = 0;
+  bulletDamage = 10;
+  damageDisplay.textContent = bulletDamage;
+
+  scoreDisplay.textContent = score;
+
+  // 清空上一局的物体
+  bullets.length = 0;
+  enemies.length = 0;
+  gates.length = 0;
+
+  // 玩家回到中间
+  player.x = canvas.width / 2;
+  activePointerId = null;
+
+  // 重置游戏计时
+  lastFrameTime = null;
+  elapsedTime = 0;
+
+  const now = performance.now();
+  lastShotTime = now;
+  lastEnemyTime = now;
+  lastGateTime = now;
+
+  // 开始新一局
+  isGameOver = false;
+  isPlaying = true;
+
+  startButton.disabled = true;
+  startButton.textContent = "Defense in Progress";
+
+  messageDisplay.textContent =
+    "Hold the line! Break supply gates to upgrade.";
+
+  requestAnimationFrame(animate);
+});
+
+// 打开页面时，先画出玩家和护盾
+draw();
