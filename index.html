@@ -3,36 +3,157 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#edf6fc">
-  <title>Gate Rush: Pink Protocol</title>
+  <meta name="theme-color" content="#090e0b">
+  <title>Graveyard Rush: Midnight Watch</title>
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
-  <header><a class="logo" href="./"><span>✦</span> GATE RUSH</a><small>EMERGENCY DEFENSE SYSTEM</small></header>
-  <main>
+  <header class="site-header">
+    <a class="logo" href="./">
+      <span class="logo-icon" aria-hidden="true">✦</span>
+      GRAVEYARD RUSH
+    </a>
+
+    <span class="header-label">HALLOWEEN · MIDNIGHT WATCH</span>
+  </header>
+
+  <main class="layout">
     <section class="intro">
-      <div class="eyebrow">● PINK PROTOCOL: ACTIVE</div>
-      <h1>Cute bots.<br>Bad code.<br><em>Hold the line.</em></h1>
-      <p>The city's helpers have turned hostile. You're the last repair tech defending the shelter from a corrupted robot army.</p>
-      <ol>
-        <li><strong>Find your lane</strong><p>Drag left or right. Your repair blaster fires automatically.</p></li>
-        <li><strong>Choose your upgrade</strong><p>Break one gate per pair: POWER increases damage; SHIELD increases capacity and restores the same amount.</p></li>
-        <li><strong>Watch for elites</strong><p>Every fifth robot is an elite. Escaped robots damage your shield. Elites hit three times harder.</p></li>
+      <div class="eyebrow">● THE DEAD ARE RISING</div>
+
+      <h1>
+        Dead rise.<br>
+        You stand.<br>
+        <em>Own the night.</em>
+      </h1>
+
+      <p class="intro-text">
+        The graveyard gates have opened.
+        You are the Pumpkin Warden:
+        a witch-hatted hunter defending the last safehouse
+        with a pumpkin blaster.
+      </p>
+
+      <ol class="instructions">
+        <li>
+          <strong>Find your lane</strong>
+          <p>
+            Drag left or right.
+            Your pumpkin blaster fires automatically.
+          </p>
+        </li>
+
+        <li>
+          <strong>Choose your upgrade</strong>
+          <p>
+            Break green POWER crates for damage,
+            or red WARD crates for protection.
+            Only one reward per pair.
+          </p>
+        </li>
+
+        <li>
+          <strong>Beware the brutes</strong>
+          <p>
+            More brutes emerge as the night goes on.
+            Escaped zombies damage the safehouse ward.
+            Brutes hit three times harder.
+          </p>
+        </li>
       </ol>
-      <div class="tip">✧ Power up or patch up?<br><span>The shelter is counting on you.</span></div>
-      <p class="fine">New stage every 10 seconds. Survive for a high score. Leaving the window pauses the game.</p>
+
+      <div class="tip">
+        ✧ Power up or patch up?<br>
+        <span>Keep the safehouse alive.</span>
+      </div>
+
+      <p class="fine">
+        A new wave every 10 seconds.
+        Supplies every 12 seconds, one pair at a time.
+        Leaving the window pauses the game.
+      </p>
     </section>
-    <section class="arcade" aria-label="Gate Rush game">
-      <div class="toolbar"><div class="game-name">✦ <strong>Pink Protocol</strong></div><div class="stage-label">STAGE <b id="stage">1</b></div></div>
-      <div class="stats"><div><small>SCORE</small><strong id="score">0</strong></div><div><small>DAMAGE</small><strong id="damage">10</strong></div><div><small>SHIELD</small><strong id="shield">200 / 200</strong></div></div>
-      <div class="canvas-frame"><canvas id="gameCanvas" width="480" height="600" aria-label="Drag horizontally to aim. Blue gates grant power, pink gates grant shield."></canvas></div>
-      <p id="message" role="status" aria-live="polite">Protect the shelter. Choose your upgrades.</p>
-      <button id="startButton" class="primary" type="button">Defend the Shelter ↗</button>
-      <div class="controls"><button id="pauseButton" type="button" disabled>Pause</button><button id="soundButton" type="button" aria-pressed="false">Sound: On</button><button id="effectsButton" type="button" aria-pressed="false">Effects: On</button></div>
-      <div class="hint">MOUSE OR TOUCH · DRAG TO AIM</div>
+
+    <section class="arcade" aria-label="Graveyard Rush game">
+      <div class="game-toolbar">
+        <div class="game-name">
+          <span aria-hidden="true">✦</span>
+          <strong>Midnight Watch</strong>
+        </div>
+
+        <div class="wave-label">
+          WAVE <b id="stage">1</b>
+        </div>
+      </div>
+
+      <div class="stats">
+        <div class="stat-card">
+          <span>SCORE</span>
+          <strong id="score">0</strong>
+        </div>
+
+        <div class="stat-card damage-card">
+          <span>DAMAGE</span>
+          <strong id="damage">10</strong>
+        </div>
+
+        <div class="stat-card">
+          <span>WARD</span>
+          <strong id="shield">200 / 200</strong>
+        </div>
+      </div>
+
+      <div class="canvas-frame">
+        <canvas
+          id="gameCanvas"
+          width="480"
+          height="600"
+          aria-label="Drag horizontally to aim. Stop zombies and shoot supply crates."
+        ></canvas>
+      </div>
+
+      <p id="message" role="status" aria-live="polite">
+        Protect the safehouse. Break cursed supply crates.
+      </p>
+
+      <button id="startButton" class="primary" type="button">
+        Guard the Safehouse ↗
+      </button>
+
+      <div class="secondary-controls">
+        <button id="pauseButton" type="button" disabled>
+          Pause
+        </button>
+
+        <button
+          id="soundButton"
+          type="button"
+          aria-pressed="false"
+        >
+          Sound: On
+        </button>
+
+        <button
+          id="effectsButton"
+          type="button"
+          aria-pressed="false"
+        >
+          Effects: On
+        </button>
+      </div>
+
+      <div class="control-hint">
+        MOUSE OR TOUCH · DRAG TO AIM
+      </div>
     </section>
   </main>
-  <footer><span>One repair tech. One last line of defense.</span><span>GATE RUSH: PINK PROTOCOL</span></footer>
+
+  <footer class="site-footer">
+    <span>One Pumpkin Warden. One very long night.</span>
+    <span>GRAVEYARD RUSH: MIDNIGHT WATCH</span>
+  </footer>
+
   <script src="game.js"></script>
 </body>
 </html>
