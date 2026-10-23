@@ -49,7 +49,6 @@ let damageFlash = 0;
 let lastWardDamage = 0;
 let banner = null;
 
-let soundEnabled = true;
 
 let effectsEnabled = !window.matchMedia(
   "(prefers-reduced-motion: reduce)"
@@ -118,27 +117,54 @@ function message(value) {
   $("message").textContent = value;
 }
 
-// ---------- 音效 ----------
-
-// 所有声音都连接到这个总音量节点。
-// 因此静音会同时关闭射击、升级和击杀声音。
+// ---------- 音乐与音效 ----------
 
 let audio = null;
 let masterVolume = null;
+let musicGain = null;
+let sfxGain = null;
 
+let musicEnabled = true;
+let sfxEnabled = true;
+let musicVolume = 0.4;
+
+let nextMusicTime = 0;
+let musicStep = 0;
+
+const musicBpm = 150;
+const musicStepDuration = 60 / musicBpm / 4;
+
+const musicMelody = [
+  440, 0, 440, 523.25,
+  440, 0, 659.25, 523.25,
+  392, 0, 392, 523.25,
+  493.88, 0, 392, 329.63
+];
+
+// 暂停时关闭总输出。
+// 音乐和音效分别通过各自的音量节点。
 function syncVolume() {
   if (!audio || !masterVolume) {
     return;
   }
 
-  const audible =
-    soundEnabled &&
-    state === "playing" &&
-    !document.hidden;
+  const now = audio.currentTime;
+  const isPlaying =
+    state === "playing" && !document.hidden;
 
   masterVolume.gain.setValueAtTime(
-    audible ? 0.55 : 0,
-    audio.currentTime
+    isPlaying ? 0.55 : 0,
+    now
+  );
+
+  musicGain.gain.setValueAtTime(
+    musicEnabled ? musicVolume : 0,
+    now
+  );
+
+  sfxGain.gain.setValueAtTime(
+    sfxEnabled ? 1 : 0,
+    now
   );
 }
 
@@ -148,7 +174,7 @@ function enableAudio() {
       window.AudioContext || window.webkitAudioContext;
 
     if (!AudioClass) {
-      message("Sound unavailable. You can still play.");
+      message("Audio unavailable. You can still play.");
       return;
     }
 
@@ -156,33 +182,51 @@ function enableAudio() {
       audio = new AudioClass();
 
       masterVolume = audio.createGain();
+      musicGain = audio.createGain();
+      sfxGain = audio.createGain();
+
       masterVolume.gain.value = 0;
+
+      musicGain.connect(masterVolume);
+      sfxGain.connect(masterVolume);
       masterVolume.connect(audio.destination);
     }
 
     syncVolume();
 
     audio.resume().catch(function () {
-      message("Sound unavailable. You can still play.");
+      message("Audio unavailable. You can still play.");
     });
   } catch {
-    message("Sound unavailable. You can still play.");
+    message("Audio unavailable. You can still play.");
   }
 }
 
+// 最后一个参数决定这段声音属于音乐还是音效。
+// 原有射击和升级代码不用改，默认都是音效。
 function tone(
   frequency,
   duration,
   volume,
   endFrequency = frequency,
   delay = 0,
-  type = "sine"
+  type = "sine",
+  channel = "sfx"
 ) {
   if (
-    !soundEnabled ||
     state !== "playing" ||
+    document.hidden ||
     !audio ||
     audio.state !== "running"
+  ) {
+    return;
+  }
+
+  const isMusic = channel === "music";
+
+  if (
+    (isMusic && !musicEnabled) ||
+    (!isMusic && !sfxEnabled)
   ) {
     return;
   }
@@ -216,7 +260,7 @@ function tone(
   );
 
   oscillator.connect(gain);
-  gain.connect(masterVolume);
+  gain.connect(isMusic ? musicGain : sfxGain);
 
   oscillator.start(start);
   oscillator.stop(start + duration + 0.02);
@@ -228,11 +272,9 @@ function tone(
 }
 
 function playBruteSound() {
-  // 低音冲击
   tone(160, 0.38, 0.23, 38, 0, "triangle");
   tone(90, 0.26, 0.18, 32);
 
-  // 上升的击杀提示
   const notes = [523.25, 659.25, 783.99, 1046.5];
 
   notes.forEach(function (frequency, index) {
@@ -259,100 +301,69 @@ function playUpgradeSound() {
     );
   });
 }
-// ---------- 万圣节电子 BGM ----------
 
-let nextMusicTime = 0;
-let musicStep = 0;
-
-const musicBpm = 150;
-const musicStepDuration = 60 / musicBpm / 4;
-
-// 以 A 小调为基础的重复旋律
-const musicMelody = [
-  440, 0, 440, 523.25,
-  440, 0, 659.25, 523.25,
-  392, 0, 392, 523.25,
-  493.88, 0, 392, 329.63
-];
+// BGM 中的声音统一进入 music 通道。
+function musicTone(
+  frequency,
+  duration,
+  volume,
+  endFrequency,
+  delay,
+  type
+) {
+  tone(
+    frequency,
+    duration,
+    volume,
+    endFrequency,
+    delay,
+    type,
+    "music"
+  );
+}
 
 function scheduleMusicStep(step, delay) {
-  // 每四个十六分音符打一记底鼓
   if (step % 4 === 0) {
-    tone(
-      140,
-      0.16,
-      0.20,
-      42,
-      delay,
-      "sine"
+    musicTone(
+      140, 0.16, 0.20, 42, delay, "sine"
     );
   }
 
-  // 第二拍和第四拍的短促军鼓音色
   if (step === 4 || step === 12) {
-    tone(
-      230,
-      0.09,
-      0.045,
-      95,
-      delay,
-      "triangle"
+    musicTone(
+      230, 0.09, 0.045, 95, delay, "triangle"
     );
 
-    tone(
-      1800,
-      0.035,
-      0.018,
-      600,
-      delay,
-      "square"
+    musicTone(
+      1800, 0.035, 0.018, 600, delay, "square"
     );
   }
 
-  // 踩镲：规则的高频脉冲
   if (step % 2 === 0) {
-    tone(
-      7200,
-      0.025,
-      0.009,
-      4300,
-      delay,
-      "square"
+    musicTone(
+      7200, 0.025, 0.009, 4300, delay, "square"
     );
   }
 
-  // 切分低音，增加推进感
   if ([0, 3, 6, 8, 11, 14].includes(step)) {
-    const bassFrequency = step < 8 ? 110 : 98;
+    const bass = step < 8 ? 110 : 98;
 
-    tone(
-      bassFrequency,
-      0.13,
-      0.065,
-      bassFrequency * 0.99,
-      delay,
-      "triangle"
+    musicTone(
+      bass, 0.13, 0.065,
+      bass * 0.99, delay, "triangle"
     );
   }
 
-  // 重复的主旋律
   const frequency = musicMelody[step];
 
   if (frequency > 0) {
-    tone(
-      frequency,
-      0.11,
-      0.023,
-      frequency,
-      delay,
-      "square"
+    musicTone(
+      frequency, 0.11, 0.023,
+      frequency, delay, "square"
     );
 
-    // 轻微回声
-    tone(
-      frequency,
-      0.09,
-      0.008,
+    musicTone(
+      frequency, 0.09, 0.008,
       frequency,
       delay + musicStepDuration * 1.5,
       "triangle"
@@ -363,7 +374,7 @@ function scheduleMusicStep(step, delay) {
 function updateMusic() {
   if (
     state !== "playing" ||
-    !soundEnabled ||
+    !musicEnabled ||
     document.hidden ||
     !audio ||
     audio.state !== "running"
@@ -375,12 +386,10 @@ function updateMusic() {
 
   const now = audio.currentTime;
 
-  // 第一次开始，或设备卡顿后，重新对齐音频时钟
   if (nextMusicTime === 0 || nextMusicTime < now) {
     nextMusicTime = now + 0.03;
   }
 
-  // 提前安排未来 0.12 秒的音符，减少节拍抖动
   while (nextMusicTime < now + 0.12) {
     scheduleMusicStep(
       musicStep,
@@ -392,24 +401,59 @@ function updateMusic() {
   }
 }
 
-$("soundButton").onclick = function () {
-  soundEnabled = !soundEnabled;
+// 音乐开关
+$("musicButton").onclick = function () {
+  musicEnabled = !musicEnabled;
 
-  $("soundButton").textContent =
-    soundEnabled ? "Sound: On" : "Sound: Off";
+  $("musicButton").textContent =
+    musicEnabled ? "Music: On" : "Music: Off";
 
-  $("soundButton").setAttribute(
+  $("musicButton").setAttribute(
     "aria-pressed",
-    String(!soundEnabled)
+    String(!musicEnabled)
   );
+
+  nextMusicTime = 0;
+  musicStep = 0;
 
   syncVolume();
 
-  if (soundEnabled) {
+  if (musicEnabled) {
     enableAudio();
   }
 };
 
+// 音效开关
+$("sfxButton").onclick = function () {
+  sfxEnabled = !sfxEnabled;
+
+  $("sfxButton").textContent =
+    sfxEnabled ? "SFX: On" : "SFX: Off";
+
+  $("sfxButton").setAttribute(
+    "aria-pressed",
+    String(!sfxEnabled)
+  );
+
+  syncVolume();
+
+  if (sfxEnabled) {
+    enableAudio();
+  }
+};
+
+// 音乐音量，不影响射击和升级音效
+$("musicVolume").addEventListener(
+  "input",
+  function () {
+    musicVolume = Number(this.value) / 100;
+
+    $("musicVolumeValue").textContent =
+      this.value + "%";
+
+    syncVolume();
+  }
+);
 // ---------- 特效开关 ----------
 
 function updateEffectsButton() {
