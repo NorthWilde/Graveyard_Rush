@@ -425,3 +425,35 @@ a:focus-visible {
     padding: 15px 20px;
   }
 }
+.music-volume {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+  padding: 10px 12px;
+  border: 1px solid #35482f;
+  border-radius: 12px;
+  background: #172219;
+  color: #b9cbae;
+  font-size: 11px;
+}
+
+.music-volume label {
+  white-space: nowrap;
+}
+
+.music-volume input {
+  flex: 1;
+  min-width: 0;
+  accent-color: #abd967;
+}
+
+.music-volume output {
+  min-width: 34px;
+  text-align: right;
+}
+
+.music-volume input:focus-visible {
+  outline: 2px solid #e9868e;
+  outline-offset: 4px;
+}

@@ -45,6 +45,8 @@ let pairId = 0;
 let pointerId = null;
 
 let shake = 0;
+let damageFlash = 0;
+let lastWardDamage = 0;
 let banner = null;
 
 let soundEnabled = true;
@@ -257,6 +259,138 @@ function playUpgradeSound() {
     );
   });
 }
+// ---------- 万圣节电子 BGM ----------
+
+let nextMusicTime = 0;
+let musicStep = 0;
+
+const musicBpm = 150;
+const musicStepDuration = 60 / musicBpm / 4;
+
+// 以 A 小调为基础的重复旋律
+const musicMelody = [
+  440, 0, 440, 523.25,
+  440, 0, 659.25, 523.25,
+  392, 0, 392, 523.25,
+  493.88, 0, 392, 329.63
+];
+
+function scheduleMusicStep(step, delay) {
+  // 每四个十六分音符打一记底鼓
+  if (step % 4 === 0) {
+    tone(
+      140,
+      0.16,
+      0.20,
+      42,
+      delay,
+      "sine"
+    );
+  }
+
+  // 第二拍和第四拍的短促军鼓音色
+  if (step === 4 || step === 12) {
+    tone(
+      230,
+      0.09,
+      0.045,
+      95,
+      delay,
+      "triangle"
+    );
+
+    tone(
+      1800,
+      0.035,
+      0.018,
+      600,
+      delay,
+      "square"
+    );
+  }
+
+  // 踩镲：规则的高频脉冲
+  if (step % 2 === 0) {
+    tone(
+      7200,
+      0.025,
+      0.009,
+      4300,
+      delay,
+      "square"
+    );
+  }
+
+  // 切分低音，增加推进感
+  if ([0, 3, 6, 8, 11, 14].includes(step)) {
+    const bassFrequency = step < 8 ? 110 : 98;
+
+    tone(
+      bassFrequency,
+      0.13,
+      0.065,
+      bassFrequency * 0.99,
+      delay,
+      "triangle"
+    );
+  }
+
+  // 重复的主旋律
+  const frequency = musicMelody[step];
+
+  if (frequency > 0) {
+    tone(
+      frequency,
+      0.11,
+      0.023,
+      frequency,
+      delay,
+      "square"
+    );
+
+    // 轻微回声
+    tone(
+      frequency,
+      0.09,
+      0.008,
+      frequency,
+      delay + musicStepDuration * 1.5,
+      "triangle"
+    );
+  }
+}
+
+function updateMusic() {
+  if (
+    state !== "playing" ||
+    !soundEnabled ||
+    document.hidden ||
+    !audio ||
+    audio.state !== "running"
+  ) {
+    nextMusicTime = 0;
+    musicStep = 0;
+    return;
+  }
+
+  const now = audio.currentTime;
+
+  // 第一次开始，或设备卡顿后，重新对齐音频时钟
+  if (nextMusicTime === 0 || nextMusicTime < now) {
+    nextMusicTime = now + 0.03;
+  }
+
+  // 提前安排未来 0.12 秒的音符，减少节拍抖动
+  while (nextMusicTime < now + 0.12) {
+    scheduleMusicStep(
+      musicStep,
+      nextMusicTime - now
+    );
+
+    nextMusicTime += musicStepDuration;
+    musicStep = (musicStep + 1) % 16;
+  }
+}
 
 $("soundButton").onclick = function () {
   soundEnabled = !soundEnabled;
@@ -337,6 +471,8 @@ function startGame() {
   enemyCount = 0;
   pairId = 0;
   shake = 0;
+  damageFlash = 0;
+  lastWardDamage = 0;  
   banner = null;
 
   [
@@ -571,9 +707,23 @@ function spawnGates() {
     )
   );
 
+    // 每次生成时，随机决定攻击门在哪一边
+  const powerOnLeft = Math.random() < 0.5;
+
+  const leftX = 12;
+  const rightX = W / 2 + 8;
+
   const options = [
-    ["power", 12, powerBonus],
-    ["shield", W / 2 + 8, shieldBonus]
+    [
+      "power",
+      powerOnLeft ? leftX : rightX,
+      powerBonus
+    ],
+    [
+      "shield",
+      powerOnLeft ? rightX : leftX,
+      shieldBonus
+    ]
   ];
 
   for (const [type, x, bonus] of options) {
@@ -894,6 +1044,8 @@ function update(deltaTime) {
         0,
         shield - enemy.attack
       );
+      damageFlash = 0.6;
+      lastWardDamage = enemy.attack;
 
       floatText(
         "−" + format(enemy.attack) + " WARD",
@@ -959,6 +1111,10 @@ function update(deltaTime) {
   }
 
   shake = Math.max(0, shake - deltaTime);
+  damageFlash = Math.max(
+  0,
+  damageFlash - deltaTime
+);
 
   if (banner) {
     banner.life -= deltaTime;
@@ -1363,6 +1519,57 @@ function draw() {
 
   ctx.globalAlpha = 1;
   ctx.restore();
+    // 低护盾提示：使用比例判断，适配升级后的护盾上限
+  const isLowWard = shield / maxShield <= 0.25;
+
+  if (isLowWard && state === "playing") {
+    ctx.save();
+
+    ctx.fillStyle = "#381b24";
+    ctx.fillRect(W / 2 - 76, 12, 152, 30);
+
+    ctx.strokeStyle = "#e56b7c";
+    ctx.lineWidth = 1;
+    ctx.strokeRect(W / 2 - 76, 12, 152, 30);
+
+    drawText(
+      "! LOW WARD",
+      W / 2,
+      27,
+      14,
+      "#ffb0b9"
+    );
+
+    ctx.restore();
+  }
+    // 护盾受损：关闭特效时仍保留文字提示
+  if (damageFlash > 0 && state === "playing") {
+    if (effectsEnabled) {
+      ctx.save();
+
+      ctx.globalAlpha = damageFlash / 0.6;
+      ctx.strokeStyle = "#ef596b";
+      ctx.lineWidth = 6;
+
+      // 只画左右下方和底边，不覆盖整个画面
+      ctx.beginPath();
+      ctx.moveTo(3, H - 100);
+      ctx.lineTo(3, H - 3);
+      ctx.lineTo(W - 3, H - 3);
+      ctx.lineTo(W - 3, H - 100);
+      ctx.stroke();
+
+      ctx.restore();
+    }
+
+    drawText(
+      "WARD −" + format(lastWardDamage),
+      W / 2,
+      H - 112,
+      18,
+      "#ff9caa"
+    );
+  }
 
   // 大型僵尸击杀提示
   if (banner) {
@@ -1425,6 +1632,8 @@ function animate(time) {
   if (state === "playing") {
     update(deltaTime);
   }
+
+    updateMusic();
 
   draw();
   requestAnimationFrame(animate);

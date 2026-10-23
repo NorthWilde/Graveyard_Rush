@@ -7,7 +7,7 @@
   <title>Graveyard Rush: Midnight Watch</title>
   <link rel="stylesheet" href="style.css">
 </head>
-
+<button id="soundButton" type="button" hidden></button>
 <body>
   <header class="site-header">
     <a class="logo" href="./">
@@ -127,12 +127,20 @@
         </button>
 
         <button
-          id="soundButton"
-          type="button"
-          aria-pressed="false"
-        >
-          Sound: On
-        </button>
+  id="musicButton"
+  type="button"
+  aria-pressed="false"
+>
+  Music: On
+</button>
+
+<button
+  id="sfxButton"
+  type="button"
+  aria-pressed="false"
+>
+  SFX: On
+</button>
 
         <button
           id="effectsButton"
@@ -142,6 +150,21 @@
           Effects: On
         </button>
       </div>
+      <div class="music-volume">
+  <label for="musicVolume">Music volume</label>
+
+  <input
+    id="musicVolume"
+    type="range"
+    min="0"
+    max="100"
+    value="40"
+  >
+
+  <output id="musicVolumeValue" for="musicVolume">
+    40%
+  </output>
+</div>
 
       <div class="control-hint">
         MOUSE OR TOUCH · DRAG TO AIM
