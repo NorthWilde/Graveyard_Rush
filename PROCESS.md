@@ -104,9 +104,6 @@ I included responses to ordinary interruptions:
 
 These choices help the game behave sensibly beyond an uninterrupted play session.
 
-## 8. User Trial and Response
-
-> This section must be completed after an actual user trial. The following is a recording framework, not a claim that testing has already taken place.
 
 ### Trial Setup
 
@@ -131,7 +128,7 @@ These choices help the game behave sensibly beyond an uninterrupted play session
 
 The record should not include the participant's name or personal information.
 
-## 9. AI Assistance and Decisions
+## 8. AI Assistance and Decisions
 
 I used OpenAI ChatGPT/Codex to discuss gameplay options, generate code and documentation drafts, explain program logic and help diagnose errors.
 
@@ -147,7 +144,7 @@ I changed the fixed left/right supply layout to random positions. I also revised
 
 These decisions support the same goal: encouraging players to observe the situation and make choices rather than staying in one position and relying on automatic shooting.
 
-## 10. Publication and Reflection
+## 9. Publication and Reflection
 
 The source is managed on GitHub, and GitHub Pages provides an online version for others to try. The development history should preserve actual changes and commits rather than reconstructing work that did not occur.
 
