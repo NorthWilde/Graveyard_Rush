@@ -13,6 +13,7 @@ The game is designed for casual players on computers and phones, with simple con
 Click **Guard the Safehouse** to begin. On a computer, hold and drag inside the game area. On a phone, drag with one finger.
 
 Audio starts after a deliberate interaction. Adjust your device volume and the in-game music settings to a comfortable level.
+![alt text](image.png)
 
 ## How to Play
 
